@@ -1,8 +1,8 @@
 // API URL
 const API_URL = 'https://wajik-anime-api.vercel.app/samehadaku';
 
-// Komponen Header
-const Header = () => {
+// Komponen Header (SUDAH DIPERBAIKI)
+const Header = ({ searchTerm, onSearchChange }) => {
     return (
         <header className="bg-gray-800 shadow-lg sticky top-0 z-40">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -24,6 +24,8 @@ const Header = () => {
                             type="text" 
                             placeholder="Cari anime..." 
                             className="bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-secondary"
+                            value={searchTerm} // Nilai input dikontrol oleh state
+                            onChange={onSearchChange} // Perubahan input memanggil fungsi dari App
                         />
                         <button className="absolute right-2 top-2 text-gray-400 hover:text-white">
                             <i className="fas fa-search"></i>
@@ -66,14 +68,12 @@ const ErrorMessage = ({ message, onRetry }) => {
 
 // Komponen Anime Card
 const AnimeCard = ({ anime, onClick }) => {
-    // Format tanggal
     const formatDate = (dateString) => {
         if (!dateString) return 'Tidak diketahui';
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
     };
 
-    // Rating dengan bintang
     const renderRating = (rating) => {
         if (!rating) return null;
         const fullStars = Math.floor(rating);
@@ -152,14 +152,12 @@ const AnimeCard = ({ anime, onClick }) => {
 
 // Komponen Detail Anime
 const AnimeDetail = ({ anime, onClose }) => {
-    // Format tanggal
     const formatDate = (dateString) => {
         if (!dateString) return 'Tidak diketahui';
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('id-ID', options);
     };
 
-    // Rating dengan bintang
     const renderRating = (rating) => {
         if (!rating) return null;
         const fullStars = Math.floor(rating);
@@ -386,9 +384,8 @@ const Footer = () => {
     );
 };
 
-// Komponen Utama App
+// Komponen Utama App (SUDAH DIPERBAIKI)
 const App = () => {
-    // State untuk data anime
     const [animeList, setAnimeList] = React.useState([]);
     const [filteredAnimeList, setFilteredAnimeList] = React.useState([]);
     const [selectedAnime, setSelectedAnime] = React.useState(null);
@@ -400,9 +397,9 @@ const App = () => {
         genres: [],
         statuses: []
     });
+    // Tambah state untuk pencarian
     const [searchTerm, setSearchTerm] = React.useState('');
 
-    // Fetch data dari API
     const fetchAnimeData = async () => {
         try {
             setLoading(true);
@@ -414,7 +411,6 @@ const App = () => {
                 setAnimeList(animeData);
                 setFilteredAnimeList(animeData);
                 
-                // Ekstrak semua genre unik
                 const allGenres = new Set();
                 const allStatuses = new Set();
                 
@@ -440,11 +436,10 @@ const App = () => {
         }
     };
 
-    // Filter anime berdasarkan filter aktif
+    // Efek untuk filter dan pencarian
     React.useEffect(() => {
         let filtered = [...animeList];
         
-        // Filter berdasarkan genre
         if (activeFilters.genres.length > 0) {
             filtered = filtered.filter(anime => {
                 if (!anime.genre || !Array.isArray(anime.genre)) return false;
@@ -452,7 +447,6 @@ const App = () => {
             });
         }
         
-        // Filter berdasarkan status
         if (activeFilters.statuses.length > 0) {
             filtered = filtered.filter(anime => 
                 activeFilters.statuses.includes(anime.status)
@@ -469,7 +463,6 @@ const App = () => {
         setFilteredAnimeList(filtered);
     }, [animeList, activeFilters, searchTerm]);
 
-    // Handle perubahan filter
     const handleFilterChange = (filterType, value) => {
         if (filterType === 'reset') {
             setActiveFilters({
@@ -495,23 +488,22 @@ const App = () => {
         });
     };
 
-    // Handle pencarian
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
+    // Fungsi untuk menangani perubahan di input pencarian
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
     };
 
-    // Fetch data saat komponen dimuat
     React.useEffect(() => {
         fetchAnimeData();
     }, []);
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Header />
+            {/* Kirim state dan fungsi pencarian ke Header */}
+            <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
             
             <main className="flex-grow container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row gap-8">
-                    {/* Sidebar Filter */}
                     <aside className="md:w-64 flex-shrink-0">
                         <Sidebar 
                             genres={genres}
@@ -521,7 +513,6 @@ const App = () => {
                         />
                     </aside>
                     
-                    {/* Konten Utama */}
                     <div className="flex-grow">
                         <div className="mb-6 flex justify-between items-center">
                             <h2 className="text-2xl font-bold">Daftar Anime</h2>
@@ -557,26 +548,12 @@ const App = () => {
             
             <Footer />
             
-            {/* Modal Detail Anime */}
             {selectedAnime && (
                 <AnimeDetail 
                     anime={selectedAnime} 
                     onClose={() => setSelectedAnime(null)} 
                 />
             )}
-            
-            {/* Override pencarian di header */}
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const searchInput = document.querySelector('input[type="text"]');
-                    if (searchInput) {
-                        searchInput.addEventListener('input', function(e) {
-                            // This would need to be connected to React state in a real implementation
-                            console.log('Search term:', e.target.value);
-                        });
-                    }
-                });
-            </script>
         </div>
     );
 };
