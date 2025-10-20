@@ -1,7 +1,63 @@
-// API URL
-const API_URL = 'https://wajik-anime-api.vercel.app/samehadaku';
+// API URL melalui CORS Proxy
+const API_URL = 'https://cors-anywhere.herokuapp.com/https://wajik-anime-api.vercel.app/samehadaku';
 
-// Komponen Header (SUDAH DIPERBAIKI)
+// Data Mock (Data Contoh) sebagai cadangan jika API gagal
+const MOCK_DATA = {
+    data: [
+        {
+            title: "Spy x Family Season 2",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1543/136425.jpg",
+            sinopsis: "Seorang mata-mata, seorang pembunuh, dan seorang anak psikis berpura-pura menjadi keluarga. Petualangan mereka yang kocak dan mengharukan berlanjut di musim kedua.",
+            uploadDate: "2023-10-15T10:00:00Z",
+            genre: ["Action", "Comedy", "Shounen"],
+            episode: 25,
+            status: "Ongoing",
+            rating: 4.8
+        },
+        {
+            title: "Jujutsu Kaisen Season 2",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1171/136255.jpg",
+            sinopsis: "Masa lalu Gojo Satoru dan Geto Suguru terungkap. Pertarungan sengit para penyihir melawan kutukan terus berlanjut di musim kedua.",
+            uploadDate: "2023-10-12T09:00:00Z",
+            genre: ["Action", "School", "Shounen"],
+            episode: 23,
+            status: "Ongoing",
+            rating: 4.9
+        },
+        {
+            title: "Frieren: Beyond Journey's End",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1515/138881.jpg",
+            sinopsis: "Setelah mengalahkan Raja Iblis, peri Frieren memulai perjalanan baru untuk memahami manusia. Sebuah kisah yang penuh perjalanan waktu dan emosi.",
+            uploadDate: "2023-10-20T08:00:00Z",
+            genre: ["Adventure", "Drama", "Fantasy"],
+            episode: 28,
+            status: "Completed",
+            rating: 4.9
+        },
+        {
+            title: "The Eminence in Shadow Season 2",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1909/137275.jpg",
+            sinopsis: "Cid Kagenou terus menjalankan kehidupan gandanya sebagai Shadow Garden, organisasi bayangan yang ia ciptakan sendiri, melawan plot misterius.",
+            uploadDate: "2023-10-05T07:00:00Z",
+            genre: ["Action", "Comedy", "Fantasy"],
+            episode: 12,
+            status: "Completed",
+            rating: 4.7
+        },
+        {
+            title: "One Piece",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
+            sinopsis: "Petualangan Monkey D. Luffy dan kru bajak laut Topi Jerami untuk menemukan harta karun legendaris, One Piece, dan menjadi Raja Bajak Laut.",
+            uploadDate: "2023-10-22T06:00:00Z",
+            genre: ["Adventure", "Comedy", "Shounen"],
+            episode: 1089,
+            status: "Ongoing",
+            rating: 4.8
+        }
+    ]
+};
+
+// Komponen Header
 const Header = ({ searchTerm, onSearchChange }) => {
     return (
         <header className="bg-gray-800 shadow-lg sticky top-0 z-40">
@@ -24,8 +80,8 @@ const Header = ({ searchTerm, onSearchChange }) => {
                             type="text" 
                             placeholder="Cari anime..." 
                             className="bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-secondary"
-                            value={searchTerm} // Nilai input dikontrol oleh state
-                            onChange={onSearchChange} // Perubahan input memanggil fungsi dari App
+                            value={searchTerm}
+                            onChange={onSearchChange}
                         />
                         <button className="absolute right-2 top-2 text-gray-400 hover:text-white">
                             <i className="fas fa-search"></i>
@@ -49,12 +105,12 @@ const LoadingSpinner = () => {
     );
 };
 
-// Komponen Error Message
+// Komponen Error Message (SUDAH DIPERBAIKI)
 const ErrorMessage = ({ message, onRetry }) => {
     return (
-        <div className="bg-red-900 bg-opacity-50 p-6 rounded-lg text-center max-w-md mx-auto mt-10">
-            <i className="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
-            <h3 className="text-xl font-semibold mb-2">Terjadi Kesalahan</h3>
+        <div className="bg-yellow-900 bg-opacity-50 p-6 rounded-lg text-center max-w-md mx-auto mt-10">
+            <i className="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+            <h3 className="text-xl font-semibold mb-2">Perhatian</h3>
             <p className="mb-4">{message}</p>
             <button 
                 onClick={onRetry}
@@ -397,7 +453,6 @@ const App = () => {
         genres: [],
         statuses: []
     });
-    // Tambah state untuk pencarian
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const fetchAnimeData = async () => {
@@ -430,13 +485,33 @@ const App = () => {
             }
         } catch (err) {
             console.error('Error fetching anime data:', err);
-            setError('Gagal memuat data anime. Silakan coba lagi nanti.');
+            // JIKA API GAGAL, GUNAKAN MOCK DATA
+            console.log("Menggunakan data contoh (mock data) karena API gagal.");
+            const animeData = MOCK_DATA.data;
+            setAnimeList(animeData);
+            setFilteredAnimeList(animeData);
+            
+            const allGenres = new Set();
+            const allStatuses = new Set();
+            animeData.forEach(anime => {
+                if (anime.genre && Array.isArray(anime.genre)) {
+                    anime.genre.forEach(g => allGenres.add(g));
+                }
+                if (anime.status) {
+                    allStatuses.add(anime.status);
+                }
+            });
+            
+            setGenres(Array.from(allGenres));
+            setStatuses(Array.from(allStatuses));
+            
+            // Tampilkan pesan peringatan bahwa yang ditampilkan adalah data contoh
+            setError("Tidak dapat terhubung ke server. Menampilkan data contoh.");
         } finally {
             setLoading(false);
         }
     };
 
-    // Efek untuk filter dan pencarian
     React.useEffect(() => {
         let filtered = [...animeList];
         
@@ -453,7 +528,6 @@ const App = () => {
             );
         }
         
-        // Filter berdasarkan pencarian
         if (searchTerm) {
             filtered = filtered.filter(anime => 
                 anime.title && anime.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -488,7 +562,6 @@ const App = () => {
         });
     };
 
-    // Fungsi untuk menangani perubahan di input pencarian
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
     };
@@ -499,7 +572,6 @@ const App = () => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            {/* Kirim state dan fungsi pencarian ke Header */}
             <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
             
             <main className="flex-grow container mx-auto px-4 py-8">
