@@ -1,7 +1,7 @@
-// API URL melalui CORS Proxy
-const API_URL = 'https://cors-anywhere.herokuapp.com/https://wajik-anime-api.vercel.app/samehadaku';
+// API URL
+const API_URL = 'https://wajik-anime-api.vercel.app/samehadaku';
 
-// Data Mock (Data Contoh) sebagai cadangan jika API gagal
+// Data Mock (Data Contoh) yang lebih lengkap dan menarik
 const MOCK_DATA = {
     data: [
         {
@@ -53,8 +53,62 @@ const MOCK_DATA = {
             episode: 1089,
             status: "Ongoing",
             rating: 4.8
+        },
+        {
+            title: "Solo Leveling",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1983/136696.jpg",
+            sinopsis: "Dunia dihubungkan dengan dungeon yang penuh monster. Hunter berjuang untuk bertahan hidung. Sung Jinwoo, hunter terlemah, mendapat kesempatan untuk naik level.",
+            uploadDate: "2024-01-01T00:00:00Z",
+            genre: ["Action", "Adventure", "Fantasy"],
+            episode: 12,
+            status: "Completed",
+            rating: 4.9
+        },
+        {
+            title: "Chainsaw Man",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1806/126216.jpg",
+            sinopsis: "Denji adalah pemuda yang hidup dalam kemiskinan. Setelah dibunuh, ia dibangkitkan sebagai iblis gergaji mesin oleh anjingnya, Pochita.",
+            uploadDate: "2023-10-01T00:00:00Z",
+            genre: ["Action", "Supernatural", "Shounen"],
+            episode: 12,
+            status: "Completed",
+            rating: 4.7
+        },
+        {
+            title: "Blue Lock",
+            thumbnail: "https://cdn.myanimelist.net/images/anime/1760/126001.jpg",
+            sinopsis: "Untuk membuat Jepang menang Piala Dunia, proyek 'Blue Lock' dibentuk. 300 pemain muda bertarung hidup dan mati untuk menjadi striker terhebat.",
+            uploadDate: "2023-09-15T00:00:00Z",
+            genre: ["Sports", "Shounen"],
+            episode: 24,
+            status: "Completed",
+            rating: 4.6
         }
     ]
+};
+
+// Komponen Notifikasi (UI Baru yang Elegan)
+const Notification = ({ message, isVisible, onClose }) => {
+    React.useEffect(() => {
+        if (isVisible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 5000); // Notifikasi hilang setelah 5 detik
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, onClose]);
+
+    if (!isVisible) return null;
+
+    return (
+        <div className="fixed top-20 right-4 z-50 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg border-l-4 border-yellow-500 flex items-center space-x-3 fade-in">
+            <i className="fas fa-info-circle text-yellow-500"></i>
+            <span className="text-sm">{message}</span>
+            <button onClick={onClose} className="ml-4 text-gray-400 hover:text-white">
+                <i className="fas fa-times"></i>
+            </button>
+        </div>
+    );
 };
 
 // Komponen Header
@@ -101,23 +155,6 @@ const LoadingSpinner = () => {
     return (
         <div className="flex justify-center items-center h-64">
             <div className="loading-spinner"></div>
-        </div>
-    );
-};
-
-// Komponen Error Message (SUDAH DIPERBAIKI)
-const ErrorMessage = ({ message, onRetry }) => {
-    return (
-        <div className="bg-yellow-900 bg-opacity-50 p-6 rounded-lg text-center max-w-md mx-auto mt-10">
-            <i className="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
-            <h3 className="text-xl font-semibold mb-2">Perhatian</h3>
-            <p className="mb-4">{message}</p>
-            <button 
-                onClick={onRetry}
-                className="bg-secondary hover:bg-primary px-4 py-2 rounded transition"
-            >
-                Coba Lagi
-            </button>
         </div>
     );
 };
@@ -377,8 +414,8 @@ const Sidebar = ({ genres, statuses, onFilterChange, activeFilters }) => {
     );
 };
 
-// Komponen Footer
-const Footer = () => {
+// Komponen Footer (SUDAH DIPERBAIKI)
+const Footer = ({ isUsingMockData }) => {
     return (
         <footer className="bg-gray-800 mt-12 py-8">
             <div className="container mx-auto px-4">
@@ -434,79 +471,68 @@ const Footer = () => {
                 
                 <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
                     <p>&copy; 2023 AnimeStream. Hak Cipta Dilindungi.</p>
+                    {isUsingMockData && (
+                        <p className="mt-2 text-xs text-yellow-500">
+                            <i className="fas fa-info-circle mr-1"></i>
+                            Saat ini menampilkan data contoh.
+                        </p>
+                    )}
                 </div>
             </div>
         </footer>
     );
 };
 
-// Komponen Utama App (SUDAH DIPERBAIKI)
+// Komponen Utama App (LOGIKA SUDAH DIPERBAIKI)
 const App = () => {
     const [animeList, setAnimeList] = React.useState([]);
     const [filteredAnimeList, setFilteredAnimeList] = React.useState([]);
     const [selectedAnime, setSelectedAnime] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
     const [genres, setGenres] = React.useState([]);
     const [statuses, setStatuses] = React.useState([]);
-    const [activeFilters, setActiveFilters] = React.useState({
-        genres: [],
-        statuses: []
-    });
+    const [activeFilters, setActiveFilters] = React.useState({ genres: [], statuses: [] });
     const [searchTerm, setSearchTerm] = React.useState('');
+    const [isUsingMockData, setIsUsingMockData] = React.useState(false);
+    const [showNotification, setShowNotification] = React.useState(false);
+
+    const processAnimeData = (data) => {
+        setAnimeList(data);
+        setFilteredAnimeList(data);
+        
+        const allGenres = new Set();
+        const allStatuses = new Set();
+        
+        data.forEach(anime => {
+            if (anime.genre && Array.isArray(anime.genre)) {
+                anime.genre.forEach(g => allGenres.add(g));
+            }
+            if (anime.status) {
+                allStatuses.add(anime.status);
+            }
+        });
+        
+        setGenres(Array.from(allGenres));
+        setStatuses(Array.from(allStatuses));
+    };
 
     const fetchAnimeData = async () => {
         try {
             setLoading(true);
-            setError(null);
             const response = await axios.get(API_URL);
             
             if (response.data && response.data.data) {
-                const animeData = response.data.data;
-                setAnimeList(animeData);
-                setFilteredAnimeList(animeData);
-                
-                const allGenres = new Set();
-                const allStatuses = new Set();
-                
-                animeData.forEach(anime => {
-                    if (anime.genre && Array.isArray(anime.genre)) {
-                        anime.genre.forEach(g => allGenres.add(g));
-                    }
-                    if (anime.status) {
-                        allStatuses.add(anime.status);
-                    }
-                });
-                
-                setGenres(Array.from(allGenres));
-                setStatuses(Array.from(allStatuses));
+                processAnimeData(response.data.data);
+                setIsUsingMockData(false);
             } else {
                 throw new Error('Format data tidak valid');
             }
         } catch (err) {
-            console.error('Error fetching anime data:', err);
-            // JIKA API GAGAL, GUNAKAN MOCK DATA
-            console.log("Menggunakan data contoh (mock data) karena API gagal.");
-            const animeData = MOCK_DATA.data;
-            setAnimeList(animeData);
-            setFilteredAnimeList(animeData);
-            
-            const allGenres = new Set();
-            const allStatuses = new Set();
-            animeData.forEach(anime => {
-                if (anime.genre && Array.isArray(anime.genre)) {
-                    anime.genre.forEach(g => allGenres.add(g));
-                }
-                if (anime.status) {
-                    allStatuses.add(anime.status);
-                }
-            });
-            
-            setGenres(Array.from(allGenres));
-            setStatuses(Array.from(allStatuses));
-            
-            // Tampilkan pesan peringatan bahwa yang ditampilkan adalah data contoh
-            setError("Tidak dapat terhubung ke server. Menampilkan data contoh.");
+            console.error('Gagal mengambil data dari API, menggunakan data contoh:', err);
+            // JIKA API GAGAL, GUNAKAN MOCK DATA TANPA MENAMPILKAN ERROR
+            processAnimeData(MOCK_DATA.data);
+            setIsUsingMockData(true);
+            setShowNotification(true); // Tampilkan notifikasi elegan
         } finally {
             setLoading(false);
         }
@@ -539,24 +565,19 @@ const App = () => {
 
     const handleFilterChange = (filterType, value) => {
         if (filterType === 'reset') {
-            setActiveFilters({
-                genres: [],
-                statuses: []
-            });
+            setActiveFilters({ genres: [], statuses: [] });
             return;
         }
         
         setActiveFilters(prev => {
             const newFilters = { ...prev };
             const filterArray = [...newFilters[filterType]];
-            
             const index = filterArray.indexOf(value);
             if (index > -1) {
                 filterArray.splice(index, 1);
             } else {
                 filterArray.push(value);
             }
-            
             newFilters[filterType] = filterArray;
             return newFilters;
         });
@@ -595,8 +616,6 @@ const App = () => {
                         
                         {loading ? (
                             <LoadingSpinner />
-                        ) : error ? (
-                            <ErrorMessage message={error} onRetry={fetchAnimeData} />
                         ) : filteredAnimeList.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {filteredAnimeList.map((anime, index) => (
@@ -618,7 +637,7 @@ const App = () => {
                 </div>
             </main>
             
-            <Footer />
+            <Footer isUsingMockData={isUsingMockData} />
             
             {selectedAnime && (
                 <AnimeDetail 
@@ -626,6 +645,12 @@ const App = () => {
                     onClose={() => setSelectedAnime(null)} 
                 />
             )}
+
+            <Notification 
+                message="Tidak dapat terhubung ke server. Menampilkan data contoh." 
+                isVisible={showNotification}
+                onClose={() => setShowNotification(false)}
+            />
         </div>
     );
 };
