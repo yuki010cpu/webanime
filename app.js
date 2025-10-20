@@ -1,7 +1,7 @@
 // API URL
 const API_URL = 'https://wajik-anime-api.vercel.app/samehadaku';
 
-// Data Mock (Data Contoh) yang lebih lengkap dan menarik
+// Data Mock (Data Contoh) untuk fallback jika API gagal
 const MOCK_DATA = {
     data: [
         {
@@ -36,64 +36,24 @@ const MOCK_DATA = {
         },
         {
             title: "The Eminence in Shadow Season 2",
-            thumbnail: "https://cdn.myanimelist.net/images/anime/1909/137275.jpg",
+            thumbnail: "https://cdn.myanimelist.net/images/1909/137275.jpg",
             sinopsis: "Cid Kagenou terus menjalankan kehidupan gandanya sebagai Shadow Garden, organisasi bayangan yang ia ciptakan sendiri, melawan plot misterius.",
             uploadDate: "2023-10-05T07:00:00Z",
             genre: ["Action", "Comedy", "Fantasy"],
             episode: 12,
             status: "Completed",
             rating: 4.7
-        },
-        {
-            title: "One Piece",
-            thumbnail: "https://cdn.myanimelist.net/images/anime/6/73245.jpg",
-            sinopsis: "Petualangan Monkey D. Luffy dan kru bajak laut Topi Jerami untuk menemukan harta karun legendaris, One Piece, dan menjadi Raja Bajak Laut.",
-            uploadDate: "2023-10-22T06:00:00Z",
-            genre: ["Adventure", "Comedy", "Shounen"],
-            episode: 1089,
-            status: "Ongoing",
-            rating: 4.8
-        },
-        {
-            title: "Solo Leveling",
-            thumbnail: "https://cdn.myanimelist.net/images/anime/1983/136696.jpg",
-            sinopsis: "Dunia dihubungkan dengan dungeon yang penuh monster. Hunter berjuang untuk bertahan hidung. Sung Jinwoo, hunter terlemah, mendapat kesempatan untuk naik level.",
-            uploadDate: "2024-01-01T00:00:00Z",
-            genre: ["Action", "Adventure", "Fantasy"],
-            episode: 12,
-            status: "Completed",
-            rating: 4.9
-        },
-        {
-            title: "Chainsaw Man",
-            thumbnail: "https://cdn.myanimelist.net/images/anime/1806/126216.jpg",
-            sinopsis: "Denji adalah pemuda yang hidup dalam kemiskinan. Setelah dibunuh, ia dibangkitkan sebagai iblis gergaji mesin oleh anjingnya, Pochita.",
-            uploadDate: "2023-10-01T00:00:00Z",
-            genre: ["Action", "Supernatural", "Shounen"],
-            episode: 12,
-            status: "Completed",
-            rating: 4.7
-        },
-        {
-            title: "Blue Lock",
-            thumbnail: "https://cdn.myanimelist.net/images/anime/1760/126001.jpg",
-            sinopsis: "Untuk membuat Jepang menang Piala Dunia, proyek 'Blue Lock' dibentuk. 300 pemain muda bertarung hidup dan mati untuk menjadi striker terhebat.",
-            uploadDate: "2023-09-15T00:00:00Z",
-            genre: ["Sports", "Shounen"],
-            episode: 24,
-            status: "Completed",
-            rating: 4.6
         }
     ]
 };
 
-// Komponen Notifikasi (UI Baru yang Elegan)
+// Komponen Notifikasi
 const Notification = ({ message, isVisible, onClose }) => {
     React.useEffect(() => {
         if (isVisible) {
             const timer = setTimeout(() => {
                 onClose();
-            }, 5000); // Notifikasi hilang setelah 5 detik
+            }, 5000);
             return () => clearTimeout(timer);
         }
     }, [isVisible, onClose]);
@@ -111,55 +71,51 @@ const Notification = ({ message, isVisible, onClose }) => {
     );
 };
 
-// Komponen Header
-const Header = ({ searchTerm, onSearchChange }) => {
-    return (
-        <header className="bg-gray-800 shadow-lg sticky top-0 z-40">
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                    <div className="text-2xl font-bold text-secondary flex items-center">
-                        <i className="fas fa-play-circle mr-2 text-accent"></i>
-                        AnimeStream
-                    </div>
-                </div>
-                <nav className="hidden md:flex space-x-6">
-                    <a href="#" className="hover:text-secondary transition">Beranda</a>
-                    <a href="#" className="hover:text-secondary transition">Terbaru</a>
-                    <a href="#" className="hover:text-secondary transition">Populer</a>
-                    <a href="#" className="hover:text-secondary transition">Genre</a>
-                </nav>
-                <div className="flex items-center space-x-4">
-                    <div className="relative">
-                        <input 
-                            type="text" 
-                            placeholder="Cari anime..." 
-                            className="bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-secondary"
-                            value={searchTerm}
-                            onChange={onSearchChange}
-                        />
-                        <button className="absolute right-2 top-2 text-gray-400 hover:text-white">
-                            <i className="fas fa-search"></i>
-                        </button>
-                    </div>
-                    <button className="md:hidden">
-                        <i className="fas fa-bars text-xl"></i>
-                    </button>
+// Header
+const Header = ({ searchTerm, onSearchChange }) => (
+    <header className="bg-gray-800 shadow-lg sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+                <div className="text-2xl font-bold text-secondary flex items-center">
+                    <i className="fas fa-play-circle mr-2 text-accent"></i>
+                    AnimeStream
                 </div>
             </div>
-        </header>
-    );
-};
-
-// Komponen Loading Spinner
-const LoadingSpinner = () => {
-    return (
-        <div className="flex justify-center items-center h-64">
-            <div className="loading-spinner"></div>
+            <nav className="hidden md:flex space-x-6">
+                <a href="#" className="hover:text-secondary transition">Beranda</a>
+                <a href="#" className="hover:text-secondary transition">Terbaru</a>
+                <a href="#" className="hover:text-secondary transition">Populer</a>
+                <a href="#" className="hover:text-secondary transition">Genre</a>
+            </nav>
+            <div className="flex items-center space-x-4">
+                <div className="relative">
+                    <input 
+                        type="text" 
+                        placeholder="Cari anime..." 
+                        className="bg-gray-700 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-secondary"
+                        value={searchTerm}
+                        onChange={onSearchChange}
+                    />
+                    <button className="absolute right-2 top-2 text-gray-400 hover:text-white">
+                        <i className="fas fa-search"></i>
+                    </button>
+                </div>
+                <button className="md:hidden">
+                    <i className="fas fa-bars text-xl"></i>
+                </button>
+            </div>
         </div>
-    );
-};
+    </header>
+);
 
-// Komponen Anime Card
+// Loading Spinner
+const LoadingSpinner = () => (
+    <div className="flex justify-center items-center h-64">
+        <div className="loading-spinner"></div>
+    </div>
+);
+
+// Anime Card
 const AnimeCard = ({ anime, onClick }) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'Tidak diketahui';
@@ -172,70 +128,38 @@ const AnimeCard = ({ anime, onClick }) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 !== 0;
         const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-        
         return (
             <div className="flex items-center">
-                {[...Array(fullStars)].map((_, i) => (
-                    <i key={`full-${i}`} className="fas fa-star text-yellow-400 text-xs"></i>
-                ))}
+                {[...Array(fullStars)].map((_, i) => <i key={i} className="fas fa-star text-yellow-400 text-xs"></i>)}
                 {hasHalfStar && <i className="fas fa-star-half-alt text-yellow-400 text-xs"></i>}
-                {[...Array(emptyStars)].map((_, i) => (
-                    <i key={`empty-${i}`} className="far fa-star text-yellow-400 text-xs"></i>
-                ))}
+                {[...Array(emptyStars)].map((_, i) => <i key={i} className="far fa-star text-yellow-400 text-xs"></i>)}
                 <span className="ml-1 text-xs">{rating}</span>
             </div>
         );
     };
 
     return (
-        <div 
-            className="anime-card bg-gray-800 rounded-lg overflow-hidden cursor-pointer h-full"
-            onClick={() => onClick(anime)}
-        >
+        <div className="anime-card bg-gray-800 rounded-lg overflow-hidden cursor-pointer h-full" onClick={() => onClick(anime)}>
             <div className="relative">
                 <img 
                     src={anime.thumbnail || 'https://picsum.photos/seed/anime/300/400.jpg'} 
                     alt={anime.title || 'Anime'} 
                     className="w-full h-64 object-cover"
-                    onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://picsum.photos/seed/fallback/300/400.jpg';
-                    }}
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://picsum.photos/seed/fallback/300/400.jpg'; }}
                 />
-                {anime.episode && (
-                    <div className="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-xs font-bold">
-                        Episode {anime.episode}
-                    </div>
-                )}
-                {anime.status && (
-                    <div className="absolute bottom-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs">
-                        {anime.status}
-                    </div>
-                )}
+                {anime.episode && <div className="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded text-xs font-bold">Episode {anime.episode}</div>}
+                {anime.status && <div className="absolute bottom-2 left-2 bg-green-600 text-white px-2 py-1 rounded text-xs">{anime.status}</div>}
             </div>
             <div className="p-4">
                 <h3 className="font-bold text-white mb-2 line-clamp-2">{anime.title || 'Tanpa Judul'}</h3>
                 <div className="flex justify-between items-center mb-2">
-                    {anime.uploadDate && (
-                        <span className="text-xs text-gray-400">
-                            <i className="far fa-calendar mr-1"></i>
-                            {formatDate(anime.uploadDate)}
-                        </span>
-                    )}
+                    {anime.uploadDate && <span className="text-xs text-gray-400"><i className="far fa-calendar mr-1"></i>{formatDate(anime.uploadDate)}</span>}
                     {anime.rating && renderRating(anime.rating)}
                 </div>
                 {anime.genre && (
                     <div className="flex flex-wrap gap-1 mt-2">
-                        {anime.genre.slice(0, 3).map((g, i) => (
-                            <span key={i} className="text-xs bg-gray-700 px-2 py-1 rounded">
-                                {g}
-                            </span>
-                        ))}
-                        {anime.genre.length > 3 && (
-                            <span className="text-xs bg-gray-700 px-2 py-1 rounded">
-                                +{anime.genre.length - 3}
-                            </span>
-                        )}
+                        {anime.genre.slice(0, 3).map((g, i) => <span key={i} className="text-xs bg-gray-700 px-2 py-1 rounded">{g}</span>)}
+                        {anime.genre.length > 3 && <span className="text-xs bg-gray-700 px-2 py-1 rounded">+{anime.genre.length - 3}</span>}
                     </div>
                 )}
             </div>
@@ -243,7 +167,7 @@ const AnimeCard = ({ anime, onClick }) => {
     );
 };
 
-// Komponen Detail Anime
+// Anime Detail
 const AnimeDetail = ({ anime, onClose }) => {
     const formatDate = (dateString) => {
         if (!dateString) return 'Tidak diketahui';
@@ -256,16 +180,11 @@ const AnimeDetail = ({ anime, onClose }) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 !== 0;
         const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-        
         return (
             <div className="flex items-center">
-                {[...Array(fullStars)].map((_, i) => (
-                    <i key={`full-${i}`} className="fas fa-star text-yellow-400"></i>
-                ))}
+                {[...Array(fullStars)].map((_, i) => <i key={i} className="fas fa-star text-yellow-400"></i>)}
                 {hasHalfStar && <i className="fas fa-star-half-alt text-yellow-400"></i>}
-                {[...Array(emptyStars)].map((_, i) => (
-                    <i key={`empty-${i}`} className="far fa-star text-yellow-400"></i>
-                ))}
+                {[...Array(emptyStars)].map((_, i) => <i key={i} className="far fa-star text-yellow-400"></i>)}
                 <span className="ml-2">{rating}/5.0</span>
             </div>
         );
@@ -275,86 +194,28 @@ const AnimeDetail = ({ anime, onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 detail-overlay bg-black bg-opacity-75">
             <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto fade-in">
                 <div className="relative">
-                    <button 
-                        onClick={onClose}
-                        className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70 z-10"
-                    >
+                    <button onClick={onClose} className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-70 z-10">
                         <i className="fas fa-times"></i>
                     </button>
-                    
                     <div className="md:flex">
                         <div className="md:w-1/3">
-                            <img 
-                                src={anime.thumbnail || 'https://picsum.photos/seed/anime/300/400.jpg'} 
-                                alt={anime.title || 'Anime'} 
-                                className="w-full h-full object-cover md:rounded-l-lg"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = 'https://picsum.photos/seed/fallback/300/400.jpg';
-                                }}
-                            />
+                            <img src={anime.thumbnail || 'https://picsum.photos/seed/anime/300/400.jpg'} alt={anime.title || 'Anime'} className="w-full h-full object-cover md:rounded-l-lg"
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://picsum.photos/seed/fallback/300/400.jpg'; }} />
                         </div>
-                        
                         <div className="md:w-2/3 p-6">
                             <h1 className="text-2xl font-bold mb-4">{anime.title || 'Tanpa Judul'}</h1>
-                            
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {anime.status && (
-                                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">
-                                        {anime.status}
-                                    </span>
-                                )}
-                                {anime.episode && (
-                                    <span className="bg-accent text-white px-3 py-1 rounded-full text-sm">
-                                        Episode {anime.episode}
-                                    </span>
-                                )}
-                                {anime.uploadDate && (
-                                    <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
-                                        <i className="far fa-calendar mr-1"></i>
-                                        {formatDate(anime.uploadDate)}
-                                    </span>
-                                )}
+                                {anime.status && <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm">{anime.status}</span>}
+                                {anime.episode && <span className="bg-accent text-white px-3 py-1 rounded-full text-sm">Episode {anime.episode}</span>}
+                                {anime.uploadDate && <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm"><i className="far fa-calendar mr-1"></i>{formatDate(anime.uploadDate)}</span>}
                             </div>
-                            
-                            {anime.rating && (
-                                <div className="mb-4">
-                                    {renderRating(anime.rating)}
-                                </div>
-                            )}
-                            
-                            {anime.genre && (
-                                <div className="mb-4">
-                                    <h3 className="text-lg font-semibold mb-2">Genre</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {anime.genre.map((g, i) => (
-                                            <span key={i} className="bg-gray-700 px-3 py-1 rounded text-sm">
-                                                {g}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                            
-                            {anime.sinopsis && (
-                                <div className="mb-6">
-                                    <h3 className="text-lg font-semibold mb-2">Sinopsis</h3>
-                                    <p className="text-gray-300">{anime.sinopsis}</p>
-                                </div>
-                            )}
-                            
+                            {anime.rating && <div className="mb-4">{renderRating(anime.rating)}</div>}
+                            {anime.genre && <div className="mb-4"><h3 className="text-lg font-semibold mb-2">Genre</h3><div className="flex flex-wrap gap-2">{anime.genre.map((g, i) => <span key={i} className="bg-gray-700 px-3 py-1 rounded text-sm">{g}</span>)}</div></div>}
+                            {anime.sinopsis && <div className="mb-6"><h3 className="text-lg font-semibold mb-2">Sinopsis</h3><p className="text-gray-300">{anime.sinopsis}</p></div>}
                             <div className="flex gap-3">
-                                <button className="bg-secondary hover:bg-primary text-white px-6 py-2 rounded-lg transition flex items-center">
-                                    <i className="fas fa-play mr-2"></i>
-                                    Tonton Sekarang
-                                </button>
-                                <button className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition flex items-center">
-                                    <i className="fas fa-plus mr-2"></i>
-                                    Tambah ke Daftar
-                                </button>
-                                <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
-                                    <i className="fas fa-share-alt"></i>
-                                </button>
+                                <button className="bg-secondary hover:bg-primary text-white px-6 py-2 rounded-lg transition flex items-center"><i className="fas fa-play mr-2"></i>Tonton Sekarang</button>
+                                <button className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition flex items-center"><i className="fas fa-plus mr-2"></i>Tambah ke Daftar</button>
+                                <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"><i className="fas fa-share-alt"></i></button>
                             </div>
                         </div>
                     </div>
@@ -364,297 +225,77 @@ const AnimeDetail = ({ anime, onClose }) => {
     );
 };
 
-// Komponen Sidebar Filter
-const Sidebar = ({ genres, statuses, onFilterChange, activeFilters }) => {
-    return (
-        <div className="bg-gray-800 rounded-lg p-4 h-fit sticky top-20">
-            <h3 className="text-lg font-semibold mb-4">Filter</h3>
-            
-            <div className="mb-6">
-                <h4 className="font-medium mb-2">Genre</h4>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {genres.map((genre, i) => (
-                        <label key={i} className="flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="mr-2"
-                                checked={activeFilters.genres.includes(genre)}
-                                onChange={() => onFilterChange('genres', genre)}
-                            />
-                            <span className="text-sm">{genre}</span>
-                        </label>
-                    ))}
-                </div>
+// Sidebar Filter
+const Sidebar = ({ genres, statuses, onFilterChange, activeFilters }) => (
+    <div className="bg-gray-800 rounded-lg p-4 h-fit sticky top-20">
+        <h3 className="text-lg font-semibold mb-4">Filter</h3>
+        <div className="mb-6">
+            <h4 className="font-medium mb-2">Genre</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+                {genres.map((genre, i) => (
+                    <label key={i} className="flex items-center cursor-pointer">
+                        <input type="checkbox" className="mr-2" checked={activeFilters.genres.includes(genre)} onChange={() => onFilterChange('genres', genre)} />
+                        <span className="text-sm">{genre}</span>
+                    </label>
+                ))}
             </div>
-            
-            <div className="mb-6">
-                <h4 className="font-medium mb-2">Status</h4>
-                <div className="space-y-2">
-                    {statuses.map((status, i) => (
-                        <label key={i} className="flex items-center cursor-pointer">
-                            <input 
-                                type="checkbox" 
-                                className="mr-2"
-                                checked={activeFilters.statuses.includes(status)}
-                                onChange={() => onFilterChange('statuses', status)}
-                            />
-                            <span className="text-sm">{status}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-            
-            <button 
-                className="w-full bg-secondary hover:bg-primary text-white py-2 rounded transition"
-                onClick={() => onFilterChange('reset')}
-            >
-                Reset Filter
-            </button>
         </div>
-    );
-};
+        <div className="mb-6">
+            <h4 className="font-medium mb-2">Status</h4>
+            <div className="space-y-2">
+                {statuses.map((status, i) => (
+                    <label key={i} className="flex items-center cursor-pointer">
+                        <input type="checkbox" className="mr-2" checked={activeFilters.statuses.includes(status)} onChange={() => onFilterChange('statuses', status)} />
+                        <span className="text-sm">{status}</span>
+                    </label>
+                ))}
+            </div>
+        </div>
+        <button className="w-full bg-secondary hover:bg-primary text-white py-2 rounded transition" onClick={() => onFilterChange('reset')}>Reset Filter</button>
+    </div>
+);
 
-// Komponen Footer (SUDAH DIPERBAIKI)
-const Footer = ({ isUsingMockData }) => {
-    return (
-        <footer className="bg-gray-800 mt-12 py-8">
-            <div className="container mx-auto px-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div>
-                        <div className="text-2xl font-bold text-secondary flex items-center mb-4">
-                            <i className="fas fa-play-circle mr-2 text-accent"></i>
-                            AnimeStream
-                        </div>
-                        <p className="text-gray-400 text-sm">
-                            Platform streaming anime terlengkap dengan kualitas terbaik.
-                        </p>
+// Footer
+const Footer = ({ isUsingMockData }) => (
+    <footer className="bg-gray-800 mt-12 py-8">
+        <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div className="text-2xl font-bold text-secondary flex items-center mb-4">
+                        <i className="fas fa-play-circle mr-2 text-accent"></i>
+                        AnimeStream
                     </div>
-                    
-                    <div>
-                        <h4 className="font-semibold mb-4">Menu</h4>
-                        <ul className="space-y-2 text-gray-400 text-sm">
-                            <li><a href="#" className="hover:text-white transition">Beranda</a></li>
-                            <li><a href="#" className="hover:text-white transition">Terbaru</a></li>
-                            <li><a href="#" className="hover:text-white transition">Populer</a></li>
-                            <li><a href="#" className="hover:text-white transition">Genre</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div>
-                        <h4 className="font-semibold mb-4">Bantuan</h4>
-                        <ul className="space-y-2 text-gray-400 text-sm">
-                            <li><a href="#" className="hover:text-white transition">FAQ</a></li>
-                            <li><a href="#" className="hover:text-white transition">Kontak</a></li>
-                            <li><a href="#" className="hover:text-white transition">Kebijakan Privasi</a></li>
-                            <li><a href="#" className="hover:text-white transition">Syarat & Ketentuan</a></li>
-                        </ul>
-                    </div>
-                    
-                    <div>
-                        <h4 className="font-semibold mb-4">Ikuti Kami</h4>
-                        <div className="flex space-x-4">
-                            <a href="#" className="text-gray-400 hover:text-white transition">
-                                <i className="fab fa-facebook-f text-xl"></i>
-                            </a>
-                            <a href="#" className="text-gray-400 hover:text-white transition">
-                                <i className="fab fa-twitter text-xl"></i>
-                            </a>
-                            <a href="#" className="text-gray-400 hover:text-white transition">
-                                <i className="fab fa-instagram text-xl"></i>
-                            </a>
-                            <a href="#" className="text-gray-400 hover:text-white transition">
-                                <i className="fab fa-youtube text-xl"></i>
-                            </a>
-                        </div>
-                    </div>
+                    <p className="text-gray-400 text-sm">Platform streaming anime terlengkap dengan kualitas terbaik.</p>
                 </div>
-                
-                <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
-                    <p>&copy; 2023 AnimeStream. Hak Cipta Dilindungi.</p>
-                    {isUsingMockData && (
-                        <p className="mt-2 text-xs text-yellow-500">
-                            <i className="fas fa-info-circle mr-1"></i>
-                            Saat ini menampilkan data contoh.
-                        </p>
-                    )}
+                <div>
+                    <h4 className="font-semibold mb-4">Menu</h4>
+                    <ul className="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" className="hover:text-white transition">Beranda</a></li>
+                        <li><a href="#" className="hover:text-white transition">Terbaru</a></li>
+                        <li><a href="#" className="hover:text-white transition">Populer</a></li>
+                        <li><a href="#" className="hover:text-white transition">Genre</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold mb-4">Bantuan</h4>
+                    <ul className="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" className="hover:text-white transition">FAQ</a></li>
+                        <li><a href="#" className="hover:text-white transition">Kontak</a></li>
+                        <li><a href="#" className="hover:text-white transition">Kebijakan Privasi</a></li>
+                        <li><a href="#" className="hover:text-white transition">Syarat & Ketentuan</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 className="font-semibold mb-4">Ikuti Kami</h4>
+                    <div className="flex space-x-4">
+                        <a href="#" className="text-gray-400 hover:text-white transition"><i className="fab fa-facebook-f text-xl"></i></a>
+                        <a href="#" className="text-gray-400 hover:text-white transition"><i className="fab fa-twitter text-xl"></i></a>
+                        <a href="#" className="text-gray-400 hover:text-white transition"><i className="fab fa-instagram text-xl"></i></a>
+                        <a href="#" className="text-gray-400 hover:text-white transition"><i className="fab fa-youtube text-xl"></i></a>
+                    </div>
                 </div>
             </div>
-        </footer>
-    );
-};
-
-// Komponen Utama App (LOGIKA SUDAH DIPERBAIKI)
-const App = () => {
-    const [animeList, setAnimeList] = React.useState([]);
-    const [filteredAnimeList, setFilteredAnimeList] = React.useState([]);
-    const [selectedAnime, setSelectedAnime] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
-    const [genres, setGenres] = React.useState([]);
-    const [statuses, setStatuses] = React.useState([]);
-    const [activeFilters, setActiveFilters] = React.useState({ genres: [], statuses: [] });
-    const [searchTerm, setSearchTerm] = React.useState('');
-    const [isUsingMockData, setIsUsingMockData] = React.useState(false);
-    const [showNotification, setShowNotification] = React.useState(false);
-
-    const processAnimeData = (data) => {
-        setAnimeList(data);
-        setFilteredAnimeList(data);
-        
-        const allGenres = new Set();
-        const allStatuses = new Set();
-        
-        data.forEach(anime => {
-            if (anime.genre && Array.isArray(anime.genre)) {
-                anime.genre.forEach(g => allGenres.add(g));
-            }
-            if (anime.status) {
-                allStatuses.add(anime.status);
-            }
-        });
-        
-        setGenres(Array.from(allGenres));
-        setStatuses(Array.from(allStatuses));
-    };
-
-    const fetchAnimeData = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get(API_URL);
-            
-            if (response.data && response.data.data) {
-                processAnimeData(response.data.data);
-                setIsUsingMockData(false);
-            } else {
-                throw new Error('Format data tidak valid');
-            }
-        } catch (err) {
-            console.error('Gagal mengambil data dari API, menggunakan data contoh:', err);
-            // JIKA API GAGAL, GUNAKAN MOCK DATA TANPA MENAMPILKAN ERROR
-            processAnimeData(MOCK_DATA.data);
-            setIsUsingMockData(true);
-            setShowNotification(true); // Tampilkan notifikasi elegan
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    React.useEffect(() => {
-        let filtered = [...animeList];
-        
-        if (activeFilters.genres.length > 0) {
-            filtered = filtered.filter(anime => {
-                if (!anime.genre || !Array.isArray(anime.genre)) return false;
-                return activeFilters.genres.some(g => anime.genre.includes(g));
-            });
-        }
-        
-        if (activeFilters.statuses.length > 0) {
-            filtered = filtered.filter(anime => 
-                activeFilters.statuses.includes(anime.status)
-            );
-        }
-        
-        if (searchTerm) {
-            filtered = filtered.filter(anime => 
-                anime.title && anime.title.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-        
-        setFilteredAnimeList(filtered);
-    }, [animeList, activeFilters, searchTerm]);
-
-    const handleFilterChange = (filterType, value) => {
-        if (filterType === 'reset') {
-            setActiveFilters({ genres: [], statuses: [] });
-            return;
-        }
-        
-        setActiveFilters(prev => {
-            const newFilters = { ...prev };
-            const filterArray = [...newFilters[filterType]];
-            const index = filterArray.indexOf(value);
-            if (index > -1) {
-                filterArray.splice(index, 1);
-            } else {
-                filterArray.push(value);
-            }
-            newFilters[filterType] = filterArray;
-            return newFilters;
-        });
-    };
-
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    React.useEffect(() => {
-        fetchAnimeData();
-    }, []);
-
-    return (
-        <div className="min-h-screen flex flex-col">
-            <Header searchTerm={searchTerm} onSearchChange={handleSearchChange} />
-            
-            <main className="flex-grow container mx-auto px-4 py-8">
-                <div className="flex flex-col md:flex-row gap-8">
-                    <aside className="md:w-64 flex-shrink-0">
-                        <Sidebar 
-                            genres={genres}
-                            statuses={statuses}
-                            onFilterChange={handleFilterChange}
-                            activeFilters={activeFilters}
-                        />
-                    </aside>
-                    
-                    <div className="flex-grow">
-                        <div className="mb-6 flex justify-between items-center">
-                            <h2 className="text-2xl font-bold">Daftar Anime</h2>
-                            <div className="text-sm text-gray-400">
-                                Menampilkan {filteredAnimeList.length} dari {animeList.length} anime
-                            </div>
-                        </div>
-                        
-                        {loading ? (
-                            <LoadingSpinner />
-                        ) : filteredAnimeList.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {filteredAnimeList.map((anime, index) => (
-                                    <AnimeCard 
-                                        key={index} 
-                                        anime={anime} 
-                                        onClick={setSelectedAnime}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12">
-                                <i className="fas fa-search text-4xl text-gray-600 mb-4"></i>
-                                <h3 className="text-xl font-semibold mb-2">Tidak Ada Anime Ditemukan</h3>
-                                <p className="text-gray-400">Coba ubah filter atau kata kunci pencarian</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </main>
-            
-            <Footer isUsingMockData={isUsingMockData} />
-            
-            {selectedAnime && (
-                <AnimeDetail 
-                    anime={selectedAnime} 
-                    onClose={() => setSelectedAnime(null)} 
-                />
-            )}
-
-            <Notification 
-                message="Tidak dapat terhubung ke server. Menampilkan data contoh." 
-                isVisible={showNotification}
-                onClose={() => setShowNotification(false)}
-            />
-        </div>
-    );
-};
-
-// Render aplikasi ke DOM
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+            <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400 text-sm">
+                <p>&copy; 2023 AnimeStream. Hak Cipta Dilindungi.</p>
+                {isUsingMockData && (
+                    <p className="mt-2 text-xs text-yellow-500"><i className="fas fa-info-circle mr-1"></i>Saat ini menampilkan data contoh.</p
